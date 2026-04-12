@@ -1,0 +1,179 @@
+{
+  "enabled": {
+    "description": "启用插件",
+    "hint": "关闭后本插件完全不参与路由。",
+    "type": "bool",
+    "default": true
+  },
+  "allow_group": {
+    "description": "群聊启用",
+    "hint": "允许在群聊请求里改写 provider 选择。",
+    "type": "bool",
+    "default": true
+  },
+  "allow_private": {
+    "description": "私聊启用",
+    "hint": "允许在私聊请求里改写 provider 选择。",
+    "type": "bool",
+    "default": true
+  },
+  "honor_existing_selection": {
+    "description": "保留已有选择",
+    "hint": "若 WebUI、API 或其他插件已提前指定 provider / model，则本插件不覆盖。",
+    "type": "bool",
+    "default": true
+  },
+  "skip_command_like_messages": {
+    "description": "跳过命令消息",
+    "hint": "命令样式消息不参与路由，例如：/help、.provider、!test。",
+    "type": "bool",
+    "default": true
+  },
+  "command_like_prefixes": {
+    "description": "命令前缀",
+    "hint": "每行一个。命中这些前缀的消息会被视为命令样式消息。",
+    "type": "text",
+    "default": "/\n.\n!"
+  },
+  "route_media_to_primary": {
+    "description": "媒体优先主路由",
+    "hint": "图片、文件、语音、视频等消息默认优先走主路由。",
+    "type": "bool",
+    "default": true
+  },
+  "route_links_to_primary": {
+    "description": "链接优先主路由",
+    "hint": "带 URL 的消息默认优先走主路由。",
+    "type": "bool",
+    "default": true
+  },
+  "primary_provider_id": {
+    "description": "主路由 provider ID",
+    "hint": "直接填写 AstrBot 已配置好的 provider ID。",
+    "type": "string",
+    "default": ""
+  },
+  "secondary_provider_id": {
+    "description": "副路由 provider ID",
+    "hint": "直接填写 AstrBot 已配置好的 provider ID。",
+    "type": "string",
+    "default": ""
+  },
+  "primary_persona_id": {
+    "description": "主路由人格 ID",
+    "hint": "可选。命中主路由时读取这个人格，并只替换 system prompt 里的 Persona Instructions 段。",
+    "type": "string",
+    "default": ""
+  },
+  "secondary_persona_id": {
+    "description": "副路由人格 ID",
+    "hint": "可选。命中副路由时读取这个人格，并只替换 system prompt 里的 Persona Instructions 段。",
+    "type": "string",
+    "default": ""
+  },
+  "prefix_reply_with_route_label": {
+    "description": "回复前加路由标签",
+    "hint": "在最终回复前显示 `『标签』`。标签文本由下方两项配置；当前请求里会尽量清洗，避免后续继续看到。",
+    "type": "bool",
+    "default": false
+  },
+  "primary_reply_prefix_label": {
+    "description": "主路由标签",
+    "hint": "最终显示格式固定为 `『标签』`。",
+    "type": "string",
+    "default": "主路由"
+  },
+  "secondary_reply_prefix_label": {
+    "description": "副路由标签",
+    "hint": "最终显示格式固定为 `『标签』`。",
+    "type": "string",
+    "default": "副路由"
+  },
+  "classifier_mode": {
+    "description": "分类模式",
+    "hint": "`rules_only` 只跑规则；`rules_then_llm` 表示规则拿不准时再补一轮分类模型。",
+    "type": "string",
+    "default": "rules_only",
+    "options": [
+      "rules_only",
+      "rules_then_llm"
+    ]
+  },
+  "classifier_provider_id": {
+    "description": "分类 provider ID",
+    "hint": "仅在 `rules_then_llm` 下使用；轻量快速的小模型即可。",
+    "type": "string",
+    "default": ""
+  },
+  "classifier_system_prompt": {
+    "description": "分类 system prompt",
+    "hint": "【重要】分类模型依据该prompt应只允许返回 `primary`、`secondary` 或 `keep_default` 三者之一。建议让LLM按自己的路由偏好修改。",
+    "type": "text",
+    "default": "你是 AstrBot 的消息路由。\n仅返回一个词：primary、secondary 或 keep_default。\n\n【返回 secondary 的场景】\n\n社交与感性：问候、日常闲聊、情感慰藉、玩笑、角色扮演、闲谈琐事。\n\n碎片化处理：短句追问、拼写检查、极简词汇翻译。\n\n低风险互动：没有明显逻辑深度或事实查证需求的随意对话。\n\n【返回 primary 的场景】\n\n深度创作与分析：长篇文章撰写、深度内容总结、观点评价、复杂原理解释。\n\n逻辑与专业性：代码/技术咨询、数学计算、逻辑推导、学术调研、法律/财务/医疗咨询。\n\n任务导向：涉及插件调用、文件/图像分析、结构化数据处理、方案策划。\n\n严谨翻译：涉及专业术语、文学润色或长段落翻译。\n\n【决策原则】\n\n惯性评估：保持对话连贯性，但若用户开始讨论具体知识点或寻求建议，应立即从 secondary 切换到 primary。\n\n图像处理：除非是纯情感互动图片，否则涉及识别、分析图片的请求均返回 primary。\n\n【其他项】\n\n只有空消息、纯符号、无法判断是否为有效输入时，返回 keep_default；普通模糊短句优先 secondary。\n\n请勿解释。"
+  },
+  "uncertain_route": {
+    "description": "兜底路由",
+    "hint": "`keep_default` 表示继续使用 AstrBot 当前默认 provider。也可选择主、副路由作为兜底。",
+    "type": "string",
+    "default": "keep_default",
+    "options": [
+      "keep_default",
+      "primary",
+      "secondary"
+    ]
+  },
+  "sticky_override_enabled": {
+    "description": "启用黏性路由",
+    "hint": "显式命中强制路由正则后，短期记住这次选择。",
+    "type": "bool",
+    "default": true
+  },
+  "sticky_override_rounds": {
+    "description": "黏性轮次数",
+    "hint": "只对同一会话生效；群聊里还要求同一发送者。",
+    "type": "int",
+    "default": 3
+  },
+  "sticky_override_ttl_seconds": {
+    "description": "黏性保留秒数",
+    "hint": "超过这个时间，即使轮次数没用完也会自动失效。",
+    "type": "int",
+    "default": 600
+  },
+  "sticky_release_on_opposite_signal": {
+    "description": "反向信号时释放黏性",
+    "hint": "若当前消息出现明显反向信号，就自动回到正常分流。",
+    "type": "bool",
+    "default": true
+  },
+  "primary_route_keywords": {
+    "description": "主路由关键词",
+    "hint": "每行一个。预设工具、技术、排障、专业任务信号；这是优先分流，不是显式强制。",
+    "type": "text",
+    "default": "plugin\nplugins\nskill\nskills\ntool\ntools\ncommand\ncommands\nscreenshot\nscreen\nweb search\nsearch\nbrowser\npage\nopen url\ngithub\ncode\ndebug\nbug\nerror\ntraceback\nexception\napi\nconfig\nprovider\nprompt\nagent\nsession\nlog\nlogs\nsse\nmcp\nacademic\npaper\nresearch\nanalysis\narchitecture\nmath\nproof\nformula\nfinance\nmedical\nlegal\n插件\n工具\n技能\n命令\n指令\n截图\n屏幕\n联网\n搜索\n网页\n浏览器\nGitHub\n代码\n调试\n报错\n异常\n错误\n接口\n配置\n日志\n学术\n论文\n研究\n分析\n架构\n推导\n证明\n公式\n严谨\n专业\n财报\n法律\n医学"
+  },
+  "secondary_route_keywords": {
+    "description": "副路由关键词",
+    "hint": "每行一个。预设闲聊、寒暄、陪聊、轻互动信号；这是优先分流，不是显式强制。",
+    "type": "text",
+    "default": "hi\nhello\nhey\nthanks\nthank you\ngood morning\ngood night\njoke\nchat\nhug\n你好\n哈喽\n在吗\n谢谢\n早安\n晚安\n午安\n哈哈\n抱抱\n安慰我\n夸夸我\n讲个笑话\n陪我聊聊\n闲聊"
+  },
+  "force_primary_regex": {
+    "description": "强制主路由正则",
+    "hint": "每行一个。推荐写控制前缀，例如 `^(?:优先主路由|走主线)\\\\s*`；命中后会把匹配片段从正文和请求中移除。",
+    "type": "text",
+    "default": ""
+  },
+  "force_secondary_regex": {
+    "description": "强制副路由正则",
+    "hint": "每行一个。推荐写控制前缀，例如 `^(?:优先副路由|走副线)\\\\s*`；命中后会把匹配片段从正文和请求中移除。",
+    "type": "text",
+    "default": ""
+  },
+  "log_decisions": {
+    "description": "记录路由日志",
+    "hint": "把本次路由结果写进 AstrBot 日志，方便排查。",
+    "type": "bool",
+    "default": true
+  }
+}

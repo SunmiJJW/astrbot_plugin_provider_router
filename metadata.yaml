@@ -1,7 +1,7 @@
 name: astrbot_plugin_provider_router
 display_name: 模型路由器
 desc: 在两条可配置 provider 路线之间做消息分流，支持双正则显式强制路由、短期黏性路由、回复前缀显示与后续上下文清洗。
-version: 0.2.0
+version: 1.0.1
 author: AnegasakiNene
 astrbot_version: ">=4.10.4,<5"
 repo: https://github.com/SunmiJJW/astrbot_plugin_provider_router

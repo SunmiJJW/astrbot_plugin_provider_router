@@ -76,7 +76,7 @@ class RouteDecision:
     PLUGIN_NAME,
     "AnegasakiNene",
     "Route messages between two configurable provider targets.",
-    "0.2.0",
+    "1.0.1",
 )
 class ProviderRouterPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig = None):
@@ -560,6 +560,107 @@ class ProviderRouterPlugin(Star):
             self._clip_text(original_prompt, 160),
             self._clip_text(updated_prompt, 160),
         )
+
+    def _sanitize_request_content_value(self, content: Any) -> tuple[Any, bool]:
+        if isinstance(content, str):
+            updated = self._sanitize_context_visible_text(content)
+            return updated, updated != content
+
+        if not isinstance(content, list):
+            return content, False
+
+        changed = False
+        for item in content:
+            if isinstance(item, dict):
+                item_type = str(item.get("type", "")).strip().lower()
+                if item_type != "text":
+                    continue
+                original_text = str(item.get("text", "") or "")
+                updated_text = self._sanitize_context_visible_text(original_text)
+                if updated_text != original_text:
+                    item["text"] = updated_text
+                    changed = True
+                continue
+
+            item_type = str(getattr(item, "type", "") or "").strip().lower()
+            if item_type != "text" or not hasattr(item, "text"):
+                continue
+            original_text = str(getattr(item, "text", "") or "")
+            updated_text = self._sanitize_context_visible_text(original_text)
+            if updated_text != original_text:
+                setattr(item, "text", updated_text)
+                changed = True
+
+        return content, changed
+
+    def _sanitize_request_contexts(self, req: Any) -> None:
+        contexts = getattr(req, "contexts", None)
+        if not isinstance(contexts, list) or not contexts:
+            return
+
+        changed_count = 0
+        for message in contexts:
+            if isinstance(message, dict):
+                role = str(message.get("role", "") or "").strip().lower()
+                if role not in {"user", "assistant"}:
+                    continue
+                updated_content, changed = self._sanitize_request_content_value(
+                    message.get("content")
+                )
+                if changed:
+                    message["content"] = updated_content
+                    changed_count += 1
+                continue
+
+            role = str(getattr(message, "role", "") or "").strip().lower()
+            if role not in {"user", "assistant"} or not hasattr(message, "content"):
+                continue
+            original_content = getattr(message, "content")
+            updated_content, changed = self._sanitize_request_content_value(
+                original_content
+            )
+            if changed:
+                setattr(message, "content", updated_content)
+                changed_count += 1
+
+        if changed_count:
+            logger.info(
+                "[provider_router] sanitized visible route markers in req.contexts | changed_messages=%s",
+                changed_count,
+            )
+
+    def _sanitize_request_extra_user_content_parts(self, req: Any) -> None:
+        parts = getattr(req, "extra_user_content_parts", None)
+        if not isinstance(parts, list) or not parts:
+            return
+
+        changed_count = 0
+        for part in parts:
+            if isinstance(part, dict):
+                part_type = str(part.get("type", "") or "").strip().lower()
+                if part_type != "text":
+                    continue
+                original_text = str(part.get("text", "") or "")
+                updated_text = self._sanitize_context_visible_text(original_text)
+                if updated_text != original_text:
+                    part["text"] = updated_text
+                    changed_count += 1
+                continue
+
+            part_type = str(getattr(part, "type", "") or "").strip().lower()
+            if part_type != "text" or not hasattr(part, "text"):
+                continue
+            original_text = str(getattr(part, "text", "") or "")
+            updated_text = self._sanitize_context_visible_text(original_text)
+            if updated_text != original_text:
+                setattr(part, "text", updated_text)
+                changed_count += 1
+
+        if changed_count:
+            logger.info(
+                "[provider_router] sanitized visible route markers in req.extra_user_content_parts | changed_parts=%s",
+                changed_count,
+            )
 
     def _detect_target_from_actual_provider(self, event: AstrMessageEvent) -> str | None:
         # `_actual_llm_provider_family` is an existing upstream event extra name.
@@ -1531,6 +1632,8 @@ class ProviderRouterPlugin(Star):
             self._sanitize_request_prompt(req, original_text, rewritten_text, reason)
         self._sanitize_force_directives_in_request_prompt(req)
         self._sanitize_route_reply_prefixes_in_request_prompt(req)
+        self._sanitize_request_contexts(req)
+        self._sanitize_request_extra_user_content_parts(req)
         await self._apply_route_persona_override(event, req)
 
     @filter.on_decorating_result(priority=20)

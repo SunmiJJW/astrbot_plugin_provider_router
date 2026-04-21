@@ -281,7 +281,7 @@
   },
   "tertiary_route_keywords": {
     "description": "第三路由关键词",
-    "hint": "每行一个。推荐放 `搜索优先 / 最新 / 热点 / 发散  / 帮我搜搜` 这类第三路线索；不填写时不会主动命中第三路由关键词。",
+    "hint": "每行一个。不填写时不会主动命中第三路由关键词。",
     "type": "text",
     "default": ""
   },
@@ -293,7 +293,7 @@
   },
   "heuristic_search_route_target": {
     "description": "搜索启发式目标路由",
-    "hint": "只影响 `heuristic:search_like` / `heuristic:quoted_search_like` / `heuristic:angelheart_needs_search` 这类低成本搜索分流。默认 `tertiary`；若 Grok 搜索不稳，可改成 `secondary` 或 `primary`。注意：这不会影响 `tertiary_route_keywords` 之类的显式第三槽关键词。",
+    "hint": "只影响 `heuristic:search_like` / `heuristic:quoted_search_like` / `heuristic:angelheart_needs_search` 这类启发式搜索分流。默认 `tertiary`；可改成 `secondary` 或 `primary`。注意：这不会影响路由关键词。",
     "type": "string",
     "default": "tertiary",
     "options": [
@@ -304,7 +304,7 @@
   },
   "heuristic_search_keywords": {
     "description": "搜索型启发式关键词",
-    "hint": "每行一个。用于识别像 `搜一下 / 查一下 / 热点 / web search` 这类搜索优先表达。",
+    "hint": "每行一个。用于识别像 `搜一下 / 查一下 ` 这类搜索优先表达。",
     "type": "text",
     "default": "搜一下\n搜搜\n查一下\n查查\n帮我搜\n帮我查\n搜索一下\n联网搜\n联网查\n上网搜\n上网查\nweb search\nlook up\nsearch for\ngoogle一下\nbing一下\n大家怎么说\n最近新闻\n最新新闻\n实时消息\n最新动态\n热点\n热搜"
   },
@@ -322,7 +322,7 @@
   },
   "heuristic_search_to_primary_keywords": {
     "description": "搜索后转主路由关键词",
-    "hint": "每行一个。用于识别“先搜再做严谨分析/总结/解读”的请求；当消息同时命中搜索词和这些词时，会优先走 `primary`，避免还没到 classifier 就被普通搜索启发式直接送去第三槽。",
+    "hint": "每行一个。用于识别“先搜再做严谨分析/总结/解读”的请求；当消息同时命中搜索词和这些词时，会优先走 `primary`，避免还没到 classifier 就被普通搜索启发式直接送去你设定的搜索目标路由。",
     "type": "text",
     "default": "分析\n深度分析\n严谨分析\n总结\n做个总结\n帮我总结\n解读\n详细解读\n评估\n影响\n什么影响\n利弊\n对比\n比较\n原因\n为什么\n拆解\n梳理\n报告\n方案\n建议\n判断\n推演\n实际意味着什么\n风险\n机会\n走势\nanalyze\nanalysis\nsummarize\nsummary\nexplain the impact\nimpact\ncompare\ncomparison\nevaluate\nevaluation\nreason why\nwhy it matters\nreport\nbrief"
   },

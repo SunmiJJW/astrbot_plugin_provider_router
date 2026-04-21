@@ -47,17 +47,125 @@
     "type": "bool",
     "default": true
   },
+  "adaptive_tool_routing_enabled": {
+    "description": "启用自适应路由工具档位",
+    "hint": "普通对话先走较轻的工具 schema；当当前轮看起来像任务型请求时，再切回更完整的工具集。",
+    "type": "bool",
+    "default": false
+  },
+  "task_demand_keywords": {
+    "description": "任务需求关键词",
+    "hint": "每行一个。启用自适应路由工具档位后，会和内置的链接、代码、媒体、搜索型信号一起用于判断这一轮是否应升级到任务档位。",
+    "type": "text",
+    "default": "帮我\n请你\n请帮\n处理\n整理\n总结\n分析\n写一下\n生成\n查询\n查一下\n搜一下\n翻译\n配置\n调试\n排查\n文件\n图片\n截图\n插件\n工具\nrun\nexecute\nopen\nsearch\nlook up\nanalyze\nsummarize\ntranslate\nwrite\ncreate\ngenerate\ndebug\nconfig\nfile\nimage\nscreenshot\nplugin\ntool"
+  },
   "primary_provider_id": {
     "description": "主路由 provider ID",
     "hint": "直接填写 AstrBot 已配置好的 provider ID。",
     "type": "string",
     "default": ""
   },
+  "primary_task_provider_id": {
+    "description": "主路由任务升级 provider ID",
+    "hint": "可选。启用自适应路由工具档位后，若主路由识别到任务需求，就切到这个 provider；留空则保持当前主路由 provider，只放宽工具集。",
+    "type": "string",
+    "default": ""
+  },
+  "primary_normal_tool_mode": {
+    "description": "主路由普通工具档位",
+    "hint": "主路由在普通轮次默认使用的工具 schema 档位。",
+    "type": "string",
+    "default": "full",
+    "options": [
+      "full",
+      "light",
+      "param_only",
+      "off"
+    ]
+  },
+  "primary_task_tool_mode": {
+    "description": "主路由任务工具档位",
+    "hint": "主路由识别到任务需求后使用的工具 schema 档位。",
+    "type": "string",
+    "default": "full",
+    "options": [
+      "full",
+      "light",
+      "param_only",
+      "off"
+    ]
+  },
   "secondary_provider_id": {
     "description": "副路由 provider ID",
     "hint": "直接填写 AstrBot 已配置好的 provider ID。",
     "type": "string",
     "default": ""
+  },
+  "secondary_task_provider_id": {
+    "description": "副路由任务升级 provider ID",
+    "hint": "可选。比如平时保持轻量模型，遇到任务型请求时切到你配置好的 pro 模型；留空则只把副路由工具集从轻量放宽到完整。",
+    "type": "string",
+    "default": ""
+  },
+  "secondary_normal_tool_mode": {
+    "description": "副路由普通工具档位",
+    "hint": "副路由在普通轮次默认使用的工具 schema 档位。",
+    "type": "string",
+    "default": "light",
+    "options": [
+      "full",
+      "light",
+      "param_only",
+      "off"
+    ]
+  },
+  "secondary_task_tool_mode": {
+    "description": "副路由任务工具档位",
+    "hint": "副路由识别到任务需求后使用的工具 schema 档位。",
+    "type": "string",
+    "default": "full",
+    "options": [
+      "full",
+      "light",
+      "param_only",
+      "off"
+    ]
+  },
+  "tertiary_provider_id": {
+    "description": "第三路由 provider ID",
+    "hint": "可选。不填写时整体行为保持双路由兼容。",
+    "type": "string",
+    "default": ""
+  },
+  "tertiary_task_provider_id": {
+    "description": "第三路由任务升级 provider ID",
+    "hint": "可选。留空则只把第三路由工具集从轻量放宽到完整。",
+    "type": "string",
+    "default": ""
+  },
+  "tertiary_normal_tool_mode": {
+    "description": "第三路由普通工具档位",
+    "hint": "第三路由在普通轮次默认使用的工具 schema 档位。",
+    "type": "string",
+    "default": "light",
+    "options": [
+      "full",
+      "light",
+      "param_only",
+      "off"
+    ]
+  },
+  "tertiary_task_tool_mode": {
+    "description": "第三路由任务工具档位",
+    "hint": "第三路由识别到任务需求后使用的工具 schema 档位。",
+    "type": "string",
+    "default": "full",
+    "options": [
+      "full",
+      "light",
+      "param_only",
+      "off"
+    ]
   },
   "primary_persona_id": {
     "description": "主路由人格 ID",
@@ -71,9 +179,15 @@
     "type": "string",
     "default": ""
   },
+  "tertiary_persona_id": {
+    "description": "第三路由人格 ID",
+    "hint": "可选。命中第三路由时读取这个人格，并只替换 system prompt 里的 Persona Instructions 段。",
+    "type": "string",
+    "default": ""
+  },
   "prefix_reply_with_route_label": {
     "description": "回复前加路由标签",
-    "hint": "在最终回复前显示 `『标签』`。标签文本由下方两项配置；当前请求里会尽量清洗，避免后续继续看到。",
+    "hint": "在最终回复前显示 `『标签』`。标签文本由下方三项配置；当前请求里会尽量清洗，避免后续继续看到。",
     "type": "bool",
     "default": false
   },
@@ -88,6 +202,12 @@
     "hint": "最终显示格式固定为 `『标签』`。",
     "type": "string",
     "default": "副路由"
+  },
+  "tertiary_reply_prefix_label": {
+    "description": "第三路由标签",
+    "hint": "最终显示格式固定为 `『标签』`。",
+    "type": "string",
+    "default": "第三路由"
   },
   "classifier_mode": {
     "description": "分类模式",
@@ -107,19 +227,20 @@
   },
   "classifier_system_prompt": {
     "description": "分类 system prompt",
-    "hint": "【重要】分类模型依据该prompt应只允许返回 `primary`、`secondary` 或 `keep_default` 三者之一。建议让LLM按自己的路由偏好修改。",
+    "hint": "【重要】分类模型依据该 prompt 应只允许返回 `primary`、`secondary`、`tertiary` 或 `keep_default` 之一。若你还保留旧双槽默认 prompt，插件在启用第三路由时也会自动升级到内置三槽版本。",
     "type": "text",
     "default": "你是 AstrBot 的消息路由。\n仅返回一个词：primary、secondary 或 keep_default。\n\n【返回 secondary 的场景】\n\n社交与感性：问候、日常闲聊、情感慰藉、玩笑、角色扮演、闲谈琐事。\n\n碎片化处理：短句追问、拼写检查、极简词汇翻译。\n\n低风险互动：没有明显逻辑深度或事实查证需求的随意对话。\n\n【返回 primary 的场景】\n\n深度创作与分析：长篇文章撰写、深度内容总结、观点评价、复杂原理解释。\n\n逻辑与专业性：代码/技术咨询、数学计算、逻辑推导、学术调研、法律/财务/医疗咨询。\n\n任务导向：涉及插件调用、文件/图像分析、结构化数据处理、方案策划。\n\n严谨翻译：涉及专业术语、文学润色或长段落翻译。\n\n【决策原则】\n\n惯性评估：保持对话连贯性，但若用户开始讨论具体知识点或寻求建议，应立即从 secondary 切换到 primary。\n\n图像处理：除非是纯情感互动图片，否则涉及识别、分析图片的请求均返回 primary。\n\n【其他项】\n\n只有空消息、纯符号、无法判断是否为有效输入时，返回 keep_default；普通模糊短句优先 secondary。\n\n请勿解释。"
   },
   "uncertain_route": {
     "description": "兜底路由",
-    "hint": "`keep_default` 表示继续使用 AstrBot 当前默认 provider。也可选择主、副路由作为兜底。",
+    "hint": "`keep_default` 表示继续使用 AstrBot 当前默认 provider。也可选择主、副、第三路由作为兜底；若对应 provider 未配置，会自动退回 keep_default。",
     "type": "string",
     "default": "keep_default",
     "options": [
       "keep_default",
       "primary",
-      "secondary"
+      "secondary",
+      "tertiary"
     ]
   },
   "sticky_override_enabled": {
@@ -158,15 +279,122 @@
     "type": "text",
     "default": "hi\nhello\nhey\nthanks\nthank you\ngood morning\ngood night\njoke\nchat\nhug\n你好\n哈喽\n在吗\n谢谢\n早安\n晚安\n午安\n哈哈\n抱抱\n安慰我\n夸夸我\n讲个笑话\n陪我聊聊\n闲聊"
   },
+  "tertiary_route_keywords": {
+    "description": "第三路由关键词",
+    "hint": "每行一个。推荐放 `搜索优先 / 最新 / 热点 / 发散  / 帮我搜搜` 这类第三路线索；不填写时不会主动命中第三路由关键词。",
+    "type": "text",
+    "default": ""
+  },
+  "heuristic_search_routing_enabled": {
+    "description": "启用搜索型启发式分流",
+    "hint": "在规则和 classifier 之间额外补一层低成本搜索意图判断。具体导向由 `heuristic_search_route_target` 决定；若目标路由未配置则退到主路由。",
+    "type": "bool",
+    "default": true
+  },
+  "heuristic_search_route_target": {
+    "description": "搜索启发式目标路由",
+    "hint": "只影响 `heuristic:search_like` / `heuristic:quoted_search_like` / `heuristic:angelheart_needs_search` 这类低成本搜索分流。默认 `tertiary`；若 Grok 搜索不稳，可改成 `secondary` 或 `primary`。注意：这不会影响 `tertiary_route_keywords` 之类的显式第三槽关键词。",
+    "type": "string",
+    "default": "tertiary",
+    "options": [
+      "primary",
+      "secondary",
+      "tertiary"
+    ]
+  },
+  "heuristic_search_keywords": {
+    "description": "搜索型启发式关键词",
+    "hint": "每行一个。用于识别像 `搜一下 / 查一下 / 热点 / web search` 这类搜索优先表达。",
+    "type": "text",
+    "default": "搜一下\n搜搜\n查一下\n查查\n帮我搜\n帮我查\n搜索一下\n联网搜\n联网查\n上网搜\n上网查\nweb search\nlook up\nsearch for\ngoogle一下\nbing一下\n大家怎么说\n最近新闻\n最新新闻\n实时消息\n最新动态\n热点\n热搜"
+  },
+  "heuristic_search_negative_keywords": {
+    "description": "搜索型反向阻断词",
+    "hint": "每行一个。命中时会阻断搜索优先启发式，例如 `不要搜 / 别联网 / 不用查`，避免搜索目标路由误抢流量。",
+    "type": "text",
+    "default": "不要搜\n别搜\n不用搜\n无需搜索\n不用查\n别查\n无需查\n不要查\n别联网\n不要联网\n无需联网\n先别搜\n先别查"
+  },
+  "heuristic_search_to_primary_enabled": {
+    "description": "搜索后分析优先主路由",
+    "hint": "当消息同时像“先搜一下”和“再帮我分析 / 总结 / 解读”时，优先回到 `primary`。关闭后，这类消息会重新按普通搜索启发式走你设定的搜索目标路由。",
+    "type": "bool",
+    "default": true
+  },
+  "heuristic_search_to_primary_keywords": {
+    "description": "搜索后转主路由关键词",
+    "hint": "每行一个。用于识别“先搜再做严谨分析/总结/解读”的请求；当消息同时命中搜索词和这些词时，会优先走 `primary`，避免还没到 classifier 就被普通搜索启发式直接送去第三槽。",
+    "type": "text",
+    "default": "分析\n深度分析\n严谨分析\n总结\n做个总结\n帮我总结\n解读\n详细解读\n评估\n影响\n什么影响\n利弊\n对比\n比较\n原因\n为什么\n拆解\n梳理\n报告\n方案\n建议\n判断\n推演\n实际意味着什么\n风险\n机会\n走势\nanalyze\nanalysis\nsummarize\nsummary\nexplain the impact\nimpact\ncompare\ncomparison\nevaluate\nevaluation\nreason why\nwhy it matters\nreport\nbrief"
+  },
+  "heuristic_follow_up_enabled": {
+    "description": "启用短跟进延续启发式",
+    "hint": "对同发送者的简短 `继续 / 展开 / 详细点` 一类跟进，优先延续最近一次已命中的路由。",
+    "type": "bool",
+    "default": true
+  },
+  "heuristic_follow_up_keywords": {
+    "description": "短跟进启发式关键词",
+    "hint": "每行一个。用于识别短延续表达，例如 `继续 / 展开 / 详细点 / 再说说`。",
+    "type": "text",
+    "default": "继续\n然后呢\n那呢\n这个呢\n还有呢\n展开\n细说\n详细点\n具体点\n接着说\n继续说\n再讲讲\n再说说\n再展开\n顺便呢"
+  },
+  "heuristic_follow_up_max_chars": {
+    "description": "短跟进最大字数",
+    "hint": "超过这个长度时，除非是引用回复，否则不再按“简短跟进”处理。用于减少误把完整新问题当成延续。",
+    "type": "int",
+    "default": 20
+  },
+  "heuristic_group_follow_up_strict_enabled": {
+    "description": "群聊短跟进严格模式",
+    "hint": "开启后，群聊里若没有引用回复，只允许“很短且很新”的跟进去复用最近路由，减少串到别人上下文。",
+    "type": "bool",
+    "default": true
+  },
+  "heuristic_group_follow_up_max_chars_without_quote": {
+    "description": "群聊无引用短跟进最大字数",
+    "hint": "群聊里没有引用回复时，只有短于等于这个长度的跟进消息才允许复用最近路由。",
+    "type": "int",
+    "default": 8
+  },
+  "heuristic_group_follow_up_max_age_seconds_without_quote": {
+    "description": "群聊无引用短跟进最大时效",
+    "hint": "群聊里没有引用回复时，只有最近这段时间内的上一条路由才允许被简短跟进复用。",
+    "type": "int",
+    "default": 120
+  },
+  "recent_route_history_limit": {
+    "description": "最近路由轻量历史条数",
+    "hint": "为每个会话保留最近 N 条轻量路由记录，供 follow-up 与 classifier 参考。通常 3 到 6 条就够用。",
+    "type": "int",
+    "default": 4
+  },
+  "classifier_recent_route_context_limit": {
+    "description": "裁判可见最近路由条数",
+    "hint": "在 `rules_then_llm` 下，最多把最近几条路由摘要注入给 classifier。建议不要超过 3，避免提示词膨胀。",
+    "type": "int",
+    "default": 3
+  },
+  "recent_route_collapse_consecutive_enabled": {
+    "description": "压缩连续重复路由段",
+    "hint": "开启后，同一发送者连续多次命中同一路由时会合并成一段，并记录重复次数，减少 recent-route 历史与 classifier prompt 被刷屏。",
+    "type": "bool",
+    "default": true
+  },
   "force_primary_regex": {
     "description": "强制主路由正则",
-    "hint": "每行一个。推荐写控制前缀，例如 `^(?:优先主路由|走主线)\\\\s*`；命中后会把匹配片段从正文和请求中移除。",
+    "hint": "每行一个。推荐写控制前缀，例如 `^(?:优先主路由|走主线)\\s*`；命中后会把匹配片段从正文和请求中移除。",
     "type": "text",
     "default": ""
   },
   "force_secondary_regex": {
     "description": "强制副路由正则",
-    "hint": "每行一个。推荐写控制前缀，例如 `^(?:优先副路由|走副线)\\\\s*`；命中后会把匹配片段从正文和请求中移除。",
+    "hint": "每行一个。推荐写控制前缀，例如 `^(?:优先副路由|走副线)\\s*`；命中后会把匹配片段从正文和请求中移除。",
+    "type": "text",
+    "default": ""
+  },
+  "force_tertiary_regex": {
+    "description": "强制第三路由正则",
+    "hint": "每行一个。推荐写控制前缀，例如 `^(?:优先第三路由|走三路|用grok)\\s*`；命中后会把匹配片段从正文和请求中移除。",
     "type": "text",
     "default": ""
   },
